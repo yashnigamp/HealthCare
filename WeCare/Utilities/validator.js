@@ -43,3 +43,6 @@ exports.ValidateCountry = (country)=> {
 exports.ValidateSpeciality = (speciality) => {
     return (speciality.trim().length >= 10 && speciality.trim().length <= 50);
 }
+exports.ValidateSlot = (slot) => {
+    
+}

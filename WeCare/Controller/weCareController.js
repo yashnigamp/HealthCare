@@ -1,3 +1,4 @@
+const e = require("express");
 const Model = require("../Model/weCareSchema");
 const Validator = require("../Utilities/validator");
 
@@ -244,6 +245,43 @@ exports.getUser = async (req,res) => {
         if(data){
             res.status(201).json({
                 data
+            })
+        }else{
+            res.status(400).json({
+                "message": "User Id does not exist"
+            })
+        }
+    })
+}
+
+exports.makeAppointment = async (req,res) => {
+    let userID = req.params.userId.slice(3);
+    let coachID = req.params.coachId.slice(3);
+
+    Model.UserModel.findOne({userId: userID}).then((user)=>{
+        if(user){
+            Model.CoachesModel.findOne({coachId: coachID}).then((coach)=>{
+                if(coach){
+                    //Main logic of making appointment 
+                    if(Validator.ValidateSlot(req.body.slot)){
+                        if(Validator.ValidateDateOfAppointment(req.body.dateOfAppointment)){
+                            
+                        }else{
+                            res.status(400).json({
+                                "message": "Date should be any upcoming 7 days"
+                            })
+                        }
+                    }else{
+                        res.status(400).json({
+                            "message": "Slot should be a valid one"
+                        })
+                    }
+
+                }else{
+                    res.status(400).json({
+                        "message": "Coach Id does not exist"
+                    })
+                }
             })
         }else{
             res.status(400).json({

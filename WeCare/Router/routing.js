@@ -11,6 +11,7 @@ router.post('/coaches/login',weCareController.coachLogin);
 router.get('/coaches/all',weCareController.getAllCoaches);
 router.get('/coaches/:coachId',weCareController.getCoach);
 router.get('/users/:userId',weCareController.getUser);
+router.post('/users/booking/:userId/:coachId',weCareController.makeAppointment);
 
 
 
