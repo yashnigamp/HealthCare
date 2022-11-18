@@ -1,8 +1,8 @@
 exports.ValidateName = (name) => {
-  return (name.trim().length >= 3 && name.trim().length <= 50);
+  return name.trim().length >= 3 && name.trim().length <= 50;
 };
 exports.ValidatePassword = (password) => {
-  return (password.trim().length >= 5 && password.trim().length <= 10);
+  return password.trim().length >= 5 && password.trim().length <= 10;
 };
 exports.ValidateAge = (dateString) => {
   var today = new Date();
@@ -15,10 +15,10 @@ exports.ValidateAge = (dateString) => {
   return age >= 20 && age <= 100;
 };
 exports.ValidateGender = (gender) => {
-  return (gender === "M" || gender === "F");
+  return gender === "M" || gender === "F";
 };
 exports.ValidateNumber = (number) => {
-  return (Math.ceil(Math.log10(number + 1)) == 10);
+  return Math.ceil(Math.log10(number + 1)) == 10;
 };
 exports.ValidateEmail = (email) => {
   const a = String(email)
@@ -26,23 +26,33 @@ exports.ValidateEmail = (email) => {
     .match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
-    return (a != null ? true : false);
+  return a != null ? true : false;
 };
 exports.ValidatePincode = (pincode) => {
-    return (Math.ceil(Math.log10(pincode + 1)) == 6);
-}
-exports.ValidateCity = (city)=> {
-    return (city.trim().length >= 3 && city.trim().length <= 20);
-}
-exports.ValidateState = (state)=> {
-    return (state.trim().length >= 3 && state.trim().length <= 20);
-}
-exports.ValidateCountry = (country)=> {
-    return (country.trim().length >= 3 && country.trim().length <= 20);
-}
+  return Math.ceil(Math.log10(pincode + 1)) == 6;
+};
+exports.ValidateCity = (city) => {
+  return city.trim().length >= 3 && city.trim().length <= 20;
+};
+exports.ValidateState = (state) => {
+  return state.trim().length >= 3 && state.trim().length <= 20;
+};
+exports.ValidateCountry = (country) => {
+  return country.trim().length >= 3 && country.trim().length <= 20;
+};
 exports.ValidateSpeciality = (speciality) => {
-    return (speciality.trim().length >= 10 && speciality.trim().length <= 50);
-}
+  return speciality.trim().length >= 10 && speciality.trim().length <= 50;
+};
 exports.ValidateSlot = (slot) => {
-    
-}
+  const a = String(slot).match(/[1-9]{1}[0-9]{0,1} (AM|PM) to [1-9]{1}[0-9]{0,1} (AM|PM)/gm);
+  //console.log(a);
+  return a != null ? true : false;
+};
+exports.ValidateDateOfAppointment = (date) => {
+  const todaysDate = new Date();
+  const appointmentDate = new Date(date);
+  const diffTime = Math.abs(todaysDate - appointmentDate);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  console.log(diffDays);
+  return (diffDays<=7 && diffDays>=0)
+};

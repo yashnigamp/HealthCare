@@ -26,11 +26,20 @@ exports.setupDb = async (req, res) => {
       mobileNumber: 9621572892,
       speciality: "Hockey",
     };
+    const bookingData = {
+      bookingId: "0000",
+      userId: "0000",
+      coachId: "0000",
+      appointmentDate: "2022-11-20",
+      slot: "9 AM to 10 AM",
+    }
     const usernotes = await Model.UserModel.create(userStarterData);
     const coachNotes = await Model.CoachesModel.create(coachStarterData);
+    const bookingNotes = await Model.BookingModel.create(bookingData);
+
     res.status(201).json({
-        "message":"Go ahead"
-    })
+      message: "Go ahead",
+    });
     //console.log(usernotes);
   } catch (err) {
     console.log(err);
@@ -91,7 +100,7 @@ exports.setupUser = async (req, res) => {
               if (a) {
                 let id = "" + (parseInt(a[0].userId) + 1);
                 id = ("0000" + id).slice(-4);
-                console.log(req.body);
+                //console.log(req.body);
                 const userData = {
                   userId: id,
                   name: req.body.name,
@@ -200,93 +209,189 @@ exports.setupCoaches = async (req, res) => {
 };
 
 exports.coachLogin = async (req, res) => {
-    let id = req.body.id.slice(3);
-    Model.CoachesModel.findOne({
-      $and: [{ coachId: id }, { password: req.body.password }],
-    }).then((data) => {
-      if (data) {
-        res.status(200).send(true);
-      } else {
-        res.status(400).json({
-          message: "Incorrect coach Id or Password",
-        });
-      }
+  let id = req.body.id.slice(3);
+  Model.CoachesModel.findOne({
+    $and: [{ coachId: id }, { password: req.body.password }],
+  }).then((data) => {
+    if (data) {
+      res.status(200).send(true);
+    } else {
+      res.status(400).json({
+        message: "Incorrect coach Id or Password",
+      });
+    }
+  });
+};
+
+exports.getAllCoaches = async (req, res) => {
+  Model.CoachesModel.find().then((data) => {
+    //console.log(data);
+    res.status(200).json({
+      data: data,
     });
-  };
+  });
+};
 
-exports.getAllCoaches = async (req,res) => {
-    Model.CoachesModel.find().then((data)=> {
-        //console.log(data);
-        res.status(200).json({
-            data : data
-        })
-    })
-   
-}
+exports.getCoach = async (req, res) => {
+  let id = req.params.coachId.slice(3);
+  Model.CoachesModel.findOne({ coachId: id }).then((data) => {
+    if (data) {
+      res.status(201).json({
+        data,
+      });
+    } else {
+      res.status(400).json({
+        message: "Coach Id does not exist",
+      });
+    }
+  });
+};
+exports.getUser = async (req, res) => {
+  let id = req.params.userId.slice(3);
+  Model.UserModel.findOne({ userId: id }).then((data) => {
+    if (data) {
+      res.status(201).json({
+        data,
+      });
+    } else {
+      res.status(400).json({
+        message: "User Id does not exist",
+      });
+    }
+  });
+};
 
-exports.getCoach = async (req,res) => {
-    let id = req.params.coachId.slice(3);
-    Model.CoachesModel.findOne({coachId: id}).then((data)=> {
-        if(data){
-            res.status(201).json({
-                data
-            })
-        }else{
-            res.status(400).json({
-                "message": "Coach Id does not exist"
-            })
-        }
-    })
+exports.makeAppointment = async (req, res) => {
+  let userID = req.params.userId.slice(3);
+  let coachID = req.params.coachId.slice(3);
 
-}   
-exports.getUser = async (req,res) => {
-    let id = req.params.userId.slice(3);
-    Model.UserModel.findOne({userId: id}).then((data)=> {
-        if(data){
-            res.status(201).json({
-                data
-            })
-        }else{
-            res.status(400).json({
-                "message": "User Id does not exist"
-            })
-        }
-    })
-}
+  Model.UserModel.findOne({ userId: userID }).then((user) => {
+    if (user) {
+      Model.CoachesModel.findOne({ coachId: coachID }).then((coach) => {
+        if (coach) {
+          //Main logic of making appointment
+          if (Validator.ValidateSlot(req.body.slot)) {
+            if (
+              Validator.ValidateDateOfAppointment(req.body.dateOfAppointment)
+            ) {
+              Model.BookingModel.findOne({
+                $and: [
+                  { appointmentDate: req.body.dateOfAppointment },
+                  { slot: req.body.slot },
+                ],
+              }).then((booking) => {
+                if (booking) {
+                  res.status(400).json({
+                    message: "There is an appointment in this slot already",
+                  });
+                } else {
+                  Model.BookingModel.find({})
+                    .sort({ bookingId: -1 })
+                    .limit(1)
+                    .then(async (bookings) => {
+                      let id = "" + (parseInt(bookings[0].bookingId) + 1);
+                      id = ("0000" + id).slice(-4);
 
-exports.makeAppointment = async (req,res) => {
-    let userID = req.params.userId.slice(3);
-    let coachID = req.params.coachId.slice(3);
+                      const bookingData = {
+                        bookingId: id,
+                        userId: userID,
+                        coachId: coachID,
+                        appointmentDate: req.body.dateOfAppointment,
+                        slot: req.body.slot,
+                      }
 
-    Model.UserModel.findOne({userId: userID}).then((user)=>{
-        if(user){
-            Model.CoachesModel.findOne({coachId: coachID}).then((coach)=>{
-                if(coach){
-                    //Main logic of making appointment 
-                    if(Validator.ValidateSlot(req.body.slot)){
-                        if(Validator.ValidateDateOfAppointment(req.body.dateOfAppointment)){
-                            
-                        }else{
-                            res.status(400).json({
-                                "message": "Date should be any upcoming 7 days"
-                            })
-                        }
-                    }else{
-                        res.status(400).json({
-                            "message": "Slot should be a valid one"
-                        })
-                    }
+                      const data = await Model.BookingModel.create(bookingData);
+                      res.status(200).json({
+                        "id" : "BI-"+id
+                      });
 
-                }else{
-                    res.status(400).json({
-                        "message": "Coach Id does not exist"
-                    })
+                    });
                 }
-            })
-        }else{
+              });
+            } else {
+              res.status(400).json({
+                message: "Date should be any upcoming 7 days",
+              });
+            }
+          } else {
             res.status(400).json({
-                "message": "User Id does not exist"
-            })
+              message: "Slot should be a valid one",
+            });
+          }
+        } else {
+          res.status(400).json({
+            message: "Coach Id does not exist",
+          });
         }
+      });
+    } else {
+      res.status(400).json({
+        message: "User Id does not exist",
+      });
+    }
+  });
+};
+
+exports.reScheduleAppointment = async (req,res) => {
+  //console.log(req.body);
+  let id = req.params.bookingId.slice(3);
+  //console.log(id);
+  const appointmentObj = {
+    slot: req.body.slot,
+    appointmentDate : req.body.dateOfAppointment
+  }
+  const appointment = await Model.BookingModel.findOneAndUpdate({bookingId: id},appointmentObj,{new:true});
+  //console.log(appointment);
+  if(appointment!=null){
+    res.status(200).send(true)
+  }else{
+    res.status(400).json({
+      "message": "Booking Id does not exist"
     })
+  }
+
+
 }
+
+exports.cancelAppointment = async (req,res) => {
+  let id = req.params.bookingId.slice(3);
+  const appointment = await Model.BookingModel.deleteOne({bookingId: id})
+  if(appointment.deletedCount !=0){
+    res.status(200).send(true);
+  }else{
+    res.status(400).json({"message": "Could not delete this appointment"});
+  }
+}
+
+exports.getBookingsOfCoach = async (req,res) => {
+  let id = req.params.coachId.slice(3);
+  const data = await Model.BookingModel.find({coachId: id})
+  if(data.length !=0){
+    res.status(200).json({
+      data
+    })
+  }else{
+    res.status(400).json({
+      "message": "Could not find any bookings"
+    })
+  }
+}
+exports.getBookingsOfUser = async (req,res) => {
+  let id = req.params.userId.slice(3);
+  const data = await Model.BookingModel.find({userId: id})
+  if(data.length !=0){
+    res.status(200).json({
+      data
+    })
+  }else{
+    res.status(400).json({
+      "message": "Could not find any appointment details"
+    })
+  }
+}
+
+exports.invalid = async (req, res) => {
+  res.status(404).json({
+    message: 'Invalid path',
+  });
+};

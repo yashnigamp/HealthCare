@@ -12,7 +12,11 @@ router.get('/coaches/all',weCareController.getAllCoaches);
 router.get('/coaches/:coachId',weCareController.getCoach);
 router.get('/users/:userId',weCareController.getUser);
 router.post('/users/booking/:userId/:coachId',weCareController.makeAppointment);
-
+router.put('/booking/:bookingId',weCareController.reScheduleAppointment);
+router.delete('/booking/:bookingId',weCareController.cancelAppointment);
+router.get('/coaches/booking/:coachId',weCareController.getBookingsOfCoach);
+router.get('/users/booking/:userId',weCareController.getBookingsOfUser);
+router.all('*',weCareController.invalid)
 
 
 module.exports = router;
